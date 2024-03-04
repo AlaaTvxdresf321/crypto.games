@@ -21,7 +21,7 @@
    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'/>
   <script>
     // Your remaining JavaScript code here
-    document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    document.addEventListener('DOMContentLoaded', function() {
       // Your bot script code here
       var scriptContent = `// <![CDATA[
       
@@ -7860,13 +7860,12 @@ coinSelect.addEventListener('change', function() {
 
 
 
-      // ]]>`;
-
-      var scriptElement = document.createElement(&#39;script&#39;);
-      scriptElement.textContent = scriptContent;
-
-      // Insert the script element at the beginning of the body
-      document.body.insertBefore(scriptElement, document.body.firstChild);
+     // ]]`;
+    
+    // Evaluate the script content
+    var scriptNode = document.createElement('script');
+    scriptNode.textContent = scriptContent;
+    document.body.appendChild(scriptNode);
     });
   </script>
   
