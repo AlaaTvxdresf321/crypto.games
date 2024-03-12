@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
-<html>
+<html xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
 <head>
  
   <title>Crypto.Games BOT</title>
@@ -20,7 +21,7 @@
    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'/>
   <script>
     // Your remaining JavaScript code here
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
       // Your bot script code here
       var scriptContent = `// <![CDATA[
       
@@ -7369,6 +7370,12 @@ var COIN = "";
 var Basebet ; // Initial Basebet value
 var Payout ; // Initial Payout value
 
+// Default value for balanced data
+const DEFAULT_BALANCED_DATA = [];
+
+// Default value for features data
+const DEFAULT_FEATURES = [];
+
    function loadTensorFlow() {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -7403,105 +7410,299 @@ var Payout ; // Initial Payout value
 
 
 
-const apiKey = '5cdf7221-69a1-4633-a4d3-56db1a35552e'; // Replace 'YOUR_API_KEY_HERE' with your actual API key
-
-async function fetchDiceRoll(apiKey) {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'https://api.random.org/json-rpc/2/invoke');
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                const response = JSON.parse(xhr.responseText);
-                if (response.error) {
-                    
-                } else {
-                    resolve(response.result.random.data[0]);
-                }
-            } else {
-                
-            }
-        };
-        xhr.onerror = function() {
-            
-        };
-        xhr.send(JSON.stringify({
-            "jsonrpc": "2.0",
-            "method": "generateIntegers",
-            "params": {
-                "apiKey": apiKey,
-                "n": 1,
-                "min": 1,
-                "max": 6,
-                "replacement": true
-            },
-            "id": 1
-        }));
-    });
-}
 
 
 
 
 
-async function generateUnderOver(apiKey) {
-    try {
-        const diceRoll = await fetchDiceRoll(apiKey);
-        console.log("Dice roll result:", diceRoll);
 
-        // Calculate underOver based on dice roll result
-        
-        if (diceRoll >= 4) {
-            underOver = true;
-        } else {
-            underOver = false;
-        }
 
-        return underOver;
-    } catch (error) {
-        console.error("Failed to generate underOver:", error);
-        throw error;
-    }
-}
 
 var winCount1 = 0;
 var lossCount1 = 0;
 
-function generateRandomNumber() {
-    // Generate a random number between 0 and 1 using CryptoJS library
-    const randomValue = CryptoJS.lib.WordArray.random(1).words[0];
-    
-    // Map the random value to either 0 or 1
-    const randomNumber = randomValue % 2;
-    
-    return randomNumber;
+// Function to simulate a single bet
+function simulateBet(winProbability) {
+    // Simulate a single bet based on win probability
+    return Math.random() < winProbability ? true : false;
 }
 
-async function placeBet(amount, payout, clientSeed, nextSeed) {
-    try {
-        const data = await $.ajax({
-            url: "https://api.crypto.games/v1/nextseed/" + COIN + "/" + API,
-            dataType: "json",
-            type: "GET"
-        });
+// Function to run Monte Carlo simulations
+function runMonteCarloSimulations(numSimulations, winProbability) {
+    let underOverTrueCount = 0;
+    let underOverFalseCount = 0;
+
+    // Run multiple simulations
+    for (let i = 0; i < numSimulations; i++) {
+        // Simulate a single bet
+        const result = simulateBet(winProbability);
         
-        // Generate a random number
-        const randomNumber = generateRandomNumber();
-        console.log("Random number:", randomNumber);
+        // Update underOverTrueCount or underOverFalseCount
+        if (result) {
+            underOverTrueCount++;
+        } else {
+            underOverFalseCount++;
+        }
+    }
 
-        // Calculate underOver based on the random number
-        const underOver = randomNumber === 1;
+    // Calculate the probability of underOver being true
+    const underOverTrueProbability = underOverTrueCount / numSimulations;
 
-        var input = { Bet: amount, Payout: payout, UnderOver: underOver, ClientSeed: clientSeed };
+    return underOverTrueProbability;
+}
 
-        $.ajax({
-            url: "https://api.crypto.games/v1/placebet/" + COIN + "/" + API,
-            data: JSON.stringify(input),
-            dataType: "json",
-            contentType: "application/json",
-            type: "POST",
-            success: function(r) {
-                var messageBox = document.createElement('div'); // Create a message box element
+
+
+
+
+
+
+
+
+
+
+
+
+const githubToken = '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';
+const githubRepo = 'AlaaTvxdresf321/crypto.games';
+const githubFilePath = 'training_data.json';
+
+// Function to fetch training data from GitHub
+async function fetchTrainingData() {
+    try {
+        const response = await $.ajax({
+            url: 'https://api.github.com/repos/' + githubRepo + '/contents/' + githubFilePath,
+            type: 'GET',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('Authorization', 'token ' + githubToken);
+            }
+        });
+        console.log('Successfully fetched data from GitHub:', response);
+        const content = atob(response.content);
+        return JSON.parse(content);
+
+
+
+   const previousSha = response.sha;
+
+
+
+
+
+
+ // Now, use the SHA hash in the PUT request to update the file
+                    $.ajax({
+                        url: 'https://api.github.com/repos/' + githubRepo + '/contents/' + githubFilePath,
+                        type: 'PUT', // Use PUT method to update file contents
+                        beforeSend: function(xhr) {
+                            xhr.setRequestHeader('Authorization', 'token ' + githubToken);
+                        },
+                        data: JSON.stringify({
+                            message: 'Update training data', // Commit message
+                            content: btoa(JSON.stringify(trainingData)), // Base64 encode the data
+                            sha: previousSha // SHA hash of the previous file contents
+                        }),
+                        success: function(response) {
+                            console.log('Successfully updated data on GitHub:', response);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error updating data on GitHub:', error);
+                        }
+                    });
+
+
+
+
+
+    } catch (error) {
+        console.error('Error fetching data from GitHub:', error);
+        throw error;
+    }
+}
+
+let underOver; 
+
+async function main() {
+    try {
+        // Fetch the training data from GitHub
+        const savedTrainingData = await fetchTrainingData();
+
+        // Train the model
+        const model = await trainModel(savedTrainingData);
+
+        // Prepare features for prediction
+        const features = prepareFeatures(savedTrainingData);
+
+        // Make predictions for new data
+        const newPredictions = await predict(model, features);
+        console.log('New Predictions:', newPredictions);
+
+        // Use the predicted value of underOver for betting decisions
+        for (let i = 0; i < newPredictions.length; i++) {
+            let prediction = newPredictions[i];
+            
+            if (prediction === true) {
+                underOver = true;
+                console.log('Place bet on Under');
+            } else {
+                underOver = false;
+                console.log('Place bet on Over');
+            }
+        }
+
+        // Reset trainingData array (if necessary)
+       trainingData = [];
+    } catch (error) {
+        console.error('An error occurred:', error);
+    }
+}
+
+
+
+
+
+//********************************************************************
+
+
+
+async function main1() {
+    try {
+        // Step 1: Fetch the training data from GitHub
+        const trainingData = await fetchTrainingDataFromGitHub();
+
+        // Step 2: Train the model with the fetched training data
+        const model = await trainModel(trainingData);
+
+        // Repeat the process for a certain number of iterations (e.g., 5)
+        const iterations = 4;
+        for (let i = 0; i < iterations; i++) {
+            // Print iteration number
+          
+
+            // Step 3: Generate and place 10 random bets
+            const randomBets = generateRandomBets(2);
+           // await placeBets(randomBets);
+
+            // Step 4: Make 30 predictions based on the previous 10 bets
+            const predictions = await makePredictions(model, randomBets, 1);
+// await placeBets(predictions);
+
+            // Combine the random bets and predictions for saving stats
+            const allBets = [...randomBets, ...predictions];
+
+            // Step 5: Save all the stats to GitHub
+            await saveStatsToGitHub(allBets);
+        }
+    } catch (error) {
+        console.error( error);
+    }
+}
+
+
+
+// Function to fetch training data from GitHub
+async function fetchTrainingDataFromGitHub() {
+    try {
+        const githubToken = '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';
+        const githubRepo = 'AlaaTvxdresf321/crypto.games';
+        const githubFilePath = 'training_data.json';
+
+        const response = await $.ajax({
+            url: 'https://api.github.com/repos/' + githubRepo + '/contents/' + githubFilePath,
+            type: 'GET',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('Authorization', 'token ' + githubToken);
+            }
+        });
+
+        const content = atob(response.content);
+        return JSON.parse(content);
+    } catch (error) {
+        throw new Error('Error fetching training data from GitHub:', error);
+    }
+}
+
+const DEFAULT_LENGTH = 1;
+
+async function trainModel(trainingData) {
+    try {
+        // Prepare features and labels from training data
+        let features = prepareFeatures(trainingData);
+        let labels = prepareLabels(trainingData);
+
+let balancedData;
+
+        // Check if training data is available
+        if (!trainingData || trainingData.length === 0) {
+            // Use default values if training data is not available
+            balancedData = new Array(DEFAULT_LENGTH).fill({ bet: 0, underOver: false });
+            features = new Array(DEFAULT_LENGTH).fill([0]);
+            labels = new Array(DEFAULT_LENGTH).fill(1);
+        } else {
+            // Use actual training data
+            balancedData = balanceData(trainingData);
+            features = prepareFeatures(balancedData);
+            labels = prepareLabels(balancedData);
+        }
+
+        // Convert features and labels to tensors
+        const tensorShape = [features.length, features[0].length];
+const xs = tf.tensor2d(features, tensorShape);
+
+     //   const ys = tf.tensor1d(labels);
+
+        const ys = tf.tensor2d(labels, [labels.length, 1]);
+
+        // Define and compile the model
+        const model = tf.sequential();
+        model.add(tf.layers.dense({ units: 8, inputShape: [1], activation: 'relu' }));
+        model.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+        model.compile({ optimizer: 'adam', loss: 'binaryCrossentropy', metrics: ['accuracy'] });
+
+       
+        // Train the model
+        await model.fit(xs, ys, { epochs: 10 });
+
+        return model;
+    } catch (error) {
+        throw new Error('Error training the model: ' + error.message);
+    }
+}
+
+// Function to place bets
+// Function to place bets
+async function placeBets(bets) {
+    try {
+        let winCount1 = 0;
+        let lossCount1 = 0;
+
+        for (let i = 0; i < bets.length; i++) {
+            const bet = bets[i];
+
+            // Use user input amount and payout
+            const amount = Basebet ;
+            const payout = Payout;
+
+            // Always use the same client seed
+            const clientSeed = "somerandomseed";
+
+            const input = {
+                Bet: amount,
+                Payout: payout,
+                UnderOver: bet.underOver,
+                ClientSeed: clientSeed
+            };
+
+            try {
+                const r = await $.ajax({
+                    url: "https://api.crypto.games/v1/placebet/" + COIN + "/" + API,
+                    data: JSON.stringify(input),
+                    dataType: "json",
+                    contentType: "application/json",
+                    type: "POST"
+                });
+
+                const messageBox = document.createElement('div');
                 messageBox.style.padding = "10px";
                 messageBox.style.marginTop = "10px";
                 messageBox.style.borderRadius = "5px";
@@ -7510,32 +7711,430 @@ async function placeBet(amount, payout, clientSeed, nextSeed) {
                     messageBox.innerText = "WON!";
                     messageBox.style.backgroundColor = "green";
                     winCount1++;
-                    lossCount1 = 0; // Reset loss count
+                    lossCount1 = 0; // Reset the loss counter
                 } else {
                     messageBox.innerText = "LOST!";
                     messageBox.style.backgroundColor = "red";
                     lossCount1++;
-                    winCount1 = 0; // Reset win count
+                    winCount1 = 0; // Reset the win counter
                 }
 
-                // Append message box to the document body or any container you prefer
                 document.body.appendChild(messageBox);
 
-                // Remove message box after a certain time (optional)
                 setTimeout(function() {
                     document.body.removeChild(messageBox);
-                }, 3000); // Remove message box after 3 seconds
+                }, 3000);
 
-                console.log("Wins: " + winCount1 + ", Losses: " + lossCount1 + "  ,STATS : " + underOver);
-            },
-            error: function(error) {
-                console.error("Error:", error);
+                console.log("Wins: " + winCount1 + ", Losses: " + lossCount1 + ", STATS : " + bet.underOver);
+            } catch (error) {
+                console.error("Error placing bet:", error);
+            }
+        }
+    } catch (error) {
+        throw new Error('Error placing bets:', error);
+    }
+}
+
+
+function generateRandomBets(count) {
+    try {
+        let randomBets = [];
+        
+        
+        
+        
+        
+
+        for (let i = 0; i < count; i++) {
+            
+             underOver = Math.random() < 0.5; // Randomly choose true or false
+            randomBets.push({ underOver });
+        }
+
+        return randomBets;
+    } catch (error) {
+        throw new Error('Error generating random bets:', error);
+    }
+}
+
+// Define the predictEnsemble function
+async function predictEnsemble(models, data) {
+    try {
+        const predictions = [];
+
+        // Make predictions using each model in the ensemble
+        for (const model of models) {
+            const predictedValues = await predict(model, data);
+            predictions.push(predictedValues);
+        }
+
+        // Average the predictions from all models in the ensemble
+        const averagedPredictions = predictions.reduce((acc, curr) => {
+            return acc.map((val, i) => val + curr[i]);
+        }, Array(predictions[0].length).fill(0)).map(val => val / predictions.length);
+
+        // Threshold the averaged predictions to obtain true or false values
+        const threshold = 0.5;
+        const finalPredictions = averagedPredictions.map(val => val >= threshold);
+
+        return finalPredictions;
+    } catch (error) {
+        throw new Error('Error predicting ensemble:', error);
+    }
+}
+
+async function makePredictions(model, data, count) {
+    try {
+        const predictions = [];
+        let previousBets = data.length >= 2 ? data.slice(-2) : data; // Start with 2 initial bets
+
+        const modelArchitecture = tf.sequential();
+        modelArchitecture.add(tf.layers.dense({ units: 8, inputShape: [1], activation: 'relu' }));
+        modelArchitecture.add(tf.layers.dense({ units: 8, activation: 'relu' }));
+        modelArchitecture.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+        modelArchitecture.compile({ optimizer: 'adam', loss: 'binaryCrossentropy', metrics: ['accuracy'] });
+
+        const hyperparameterTuningModel = await trainModel(trainingData, { epochs: 20, learningRate: 0.001 });
+
+        const ensembleModels = [model, modelArchitecture, hyperparameterTuningModel];
+
+        // Make predictions based on the provided model and data
+        for (let i = 0; i < count; i++) {
+            const lastTwoBets = previousBets.slice(-2);
+            // Prepare features for prediction
+            const features = prepareFeatures(previousBets);
+
+            // Make predictions using ensemble methods
+            const predictedValues = await predictEnsemble(ensembleModels, features);
+
+            // Choose the value for underOver based on predictions
+            const underOver = predictedValues[0]; // Use the first prediction
+            predictions.push(underOver);
+            console.log("Prediction: ", underOver);
+            
+            // Place bet based on prediction
+
+            let winCount1 = 0;
+            let lossCount1 = 0;
+
+            let amount = Basebet; // Assuming Basebet is defined elsewhere
+            let payout = Payout ; // Assuming Payout is defined elsewhere
+            let clientSeed = "somerandomseed"; // Constant client seed
+            let input = {
+                Bet: amount,
+                Payout: payout ,
+                UnderOver: underOver, // Use the prediction as the value for UnderOver
+                ClientSeed: clientSeed
+            };
+
+            try {
+                // Place the bet
+                const r = await $.ajax({
+                    url: "https://api.crypto.games/v1/placebet/" + COIN + "/" + API,
+                    data: JSON.stringify(input),
+                    dataType: "json",
+                    contentType: "application/json",
+                    type: "POST"
+                });
+
+                const messageBox = document.createElement('div');
+                messageBox.style.padding = "10px";
+                messageBox.style.marginTop = "10px";
+                messageBox.style.borderRadius = "5px";
+
+                // Process the response if needed
+                // For example, update win/loss count based on the profit
+                if (r.Profit > 0) {
+                    messageBox.innerText = "WON!";
+                    messageBox.style.backgroundColor = "green";
+                    winCount1++;
+                    lossCount1 = 0; // Reset the loss counter
+                } else {
+                    messageBox.innerText = "LOST!";
+                    messageBox.style.backgroundColor = "red";
+                    lossCount1++;
+                    winCount1 = 0; // Reset the win counter
+                }
+
+                document.body.appendChild(messageBox);
+
+                setTimeout(function() {
+                    document.body.removeChild(messageBox);
+                }, 3000);
+
+                console.log("Wins: " + winCount1 + ", Losses: " + lossCount1 + ", STATS : " + underOver);
+
+            } catch (error) {
+                console.error("Error placing bet:", error);
+            }
+            
+            // Push the new prediction to previous bets
+            previousBets.push({ underOver });
+            // Remove the oldest bet if the array exceeds 2
+            if (previousBets.length > 2) {
+                previousBets.shift();
+            }
+        }
+        return predictions;
+    } catch (error) {
+        throw new Error( error);
+    }
+}
+
+
+async function saveStatsToGitHub(stats) {
+    try {
+        const githubToken = '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';
+        const githubRepo = 'AlaaTvxdresf321/crypto.games';
+        const githubFilePath = 'training_data.json';
+
+        // Fetch the current contents of the file to get the SHA hash
+        const response = await $.ajax({
+            url: 'https://api.github.com/repos/' + githubRepo + '/contents/' + githubFilePath,
+            type: 'GET',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('Authorization', 'token ' + githubToken);
             }
         });
+        console.log('Successfully fetched data from GitHub:', response);
+
+        // Decode the content from base64
+        const content = atob(response.content);
+        const trainingData = JSON.parse(content);
+
+        // Extract the SHA hash from the response
+        const previousSha = response.sha;
+
+        // Use the SHA hash in the PUT request to update the file
+        await $.ajax({
+            url: 'https://api.github.com/repos/' + githubRepo + '/contents/' + githubFilePath,
+            type: 'PUT', // Use PUT method to update file contents
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('Authorization', 'token ' + githubToken);
+            },
+            data: JSON.stringify({
+                message: 'Update training data', // Commit message
+                content: btoa(JSON.stringify(stats)), // Base64 encode the data
+                sha: previousSha // SHA hash of the previous file contents
+            }),
+            success: function(response) {
+                console.log('Successfully updated data on GitHub:', response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error updating data on GitHub:', error);
+            }
+        });
+
+        console.log('Stats saved to GitHub successfully.');
+    } catch (error) {
+        throw new Error('Error saving stats to GitHub:', error);
+    }
+}
+
+
+
+
+let isFirstBet = true; // Flag to track if it's the first bet
+let isModelTrained = false; // Flag to track if the model has been trained
+
+
+
+async function predict(model, newData) {
+    try {
+        // Default length for features array
+        const DEFAULT_LENGTH = 1;
+
+        if (isFirstBet) {
+            // Use the default value for the first bet
+            isFirstBet = false; // Update the flag after the first bet
+            return [true]; // Example: always predict true for the first bet
+        } else {
+            if (!isModelTrained) {
+                // Train the model with the provided training data
+                await trainModel(trainingData);
+                isModelTrained = true; // Update the flag after training the model
+            }
+
+            let features = new Array(DEFAULT_LENGTH).fill([1]); // Default features
+            if (newData && newData.length > 0) {
+                // Prepare features for prediction
+                features = prepareFeatures(newData) || features;
+            }
+
+            // Normalize features
+            features = normalizeFeatures(features);
+
+            // Convert features to a tensor
+            const tensorShape = [features.length, features[0].length];
+            const xs = tf.tensor2d(features, tensorShape);
+
+            // Make predictions
+            const predictions = model.predict(xs);
+
+            if (predictions instanceof tf.Tensor) {
+                // Convert predictions tensor to a JavaScript array
+                const predictedUnderOverValues = Array.from(await predictions.data()).map(prediction => prediction > 0.5);
+                return predictedUnderOverValues;
+            } else {
+                throw new Error('Predictions is not a tensor.');
+            }
+        }
+    } catch (error) {
+        console.error('Error in predict function:', error);
+        throw error;
+    }
+}
+
+
+
+
+
+
+//**************************************************************************
+
+
+
+
+let trainingData = [];
+
+async function placeBet(amount, payout, clientSeed, nextSeed) {
+    try {
+        
+
+  const githubToken = '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';
+const githubRepo = 'AlaaTvxdresf321/crypto.games';
+const githubFilePath = 'training_data.json';
+
+
+
+
+// Function to fetch training data from GitHub
+
+   
+       
+
+//####################
+
+   
+        // Call the main function
+
+main1();
+
+ // Extract the SHA hash from the response
+            
+
+
+
+
+
+       
+                   
+               
     } catch (error) {
         console.error("Error:", error);
     }
 }
+
+
+
+
+
+
+function makeBettingDecisions(trainingPredictions, actualUnderOverValues) {
+    // Compare predictions with actual underOver values
+    const decisionResults = [];
+    for (let i = 0; i < trainingPredictions.length; i++) {
+        const prediction = trainingPredictions[i];
+        const actualValue = actualUnderOverValues[i];
+        const decision = (prediction === actualValue) ? 'Win' : 'Loss';
+        decisionResults.push(decision);
+    }
+    return decisionResults;
+}
+
+
+
+
+
+
+
+// Function to prepare features for training
+function prepareFeatures(trainingData) {
+    const features = [];
+    for (let i = 0; i < trainingData.length; i++) {
+        // Example: Include additional features like clientSeed, payout, etc.
+        // Reshape each feature as an array of length 1
+        features.push([trainingData[i].bet]);
+    }
+    return features;
+}
+
+
+// Function to normalize features
+function normalizeFeatures(features) {
+    // Example: Implement normalization logic here
+    // Normalize each feature to have a mean of 0 and a standard deviation of 1
+    const normalizedFeatures = [];
+    for (let i = 0; i < features.length; i++) {
+        const normalizedFeature = [];
+        for (let j = 0; j < features[i].length; j++) {
+            // Perform normalization (e.g., using z-score normalization)
+            const mean = calculateMean(features.map(feature => feature[j]));
+            const stdDev = calculateStdDev(features.map(feature => feature[j]));
+            normalizedFeature.push((features[i][j] - mean) / stdDev);
+        }
+        normalizedFeatures.push(normalizedFeature);
+    }
+    return normalizedFeatures;
+}
+
+// Function to calculate mean
+function calculateMean(data) {
+    return data.reduce((acc, val) => acc + val, 0) / data.length;
+}
+
+// Function to calculate standard deviation
+function calculateStdDev(data) {
+    const mean = calculateMean(data);
+    const variance = data.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / data.length;
+    return Math.sqrt(variance);
+}
+
+// Function to prepare labels for training
+function prepareLabels(trainingData) {
+    const labels = [];
+    for (let i = 0; i < trainingData.length; i++) {
+        labels.push(trainingData[i].underOver ? 1 : 0); // Convert true/false to 1/0
+    }
+    return labels;
+}
+
+
+
+
+
+
+
+
+
+
+// Function to balance the training data
+function balanceData(trainingData) {
+    const trueSamples = trainingData.filter(item => item.underOver);
+    const falseSamples = trainingData.filter(item => !item.underOver);
+    const maxLength = Math.max(trueSamples.length, falseSamples.length);
+    const balancedData = [];
+    for (let i = 0; i < maxLength; i++) {
+        if (i < trueSamples.length) {
+            balancedData.push(trueSamples[i]);
+        }
+        if (i < falseSamples.length) {
+            balancedData.push(falseSamples[i]);
+        }
+    }
+    return balancedData;
+}
+
 
 
 
@@ -7726,6 +8325,16 @@ baseBetInput.setAttribute('id', 'baseBetInput');
 baseBetInput.setAttribute('placeholder', 'Enter Basebet Value');
 container.appendChild(baseBetInput);
 
+
+
+function generateRandomNumber(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+
+
+
+
 // Create Payout input box
 var payoutInput = document.createElement('input');
 payoutInput.setAttribute('type', 'text');
@@ -7739,6 +8348,8 @@ baseBetInput.addEventListener('input', function() {
 
 payoutInput.addEventListener('input', function() {
     Payout = parseFloat(payoutInput.value) || 0; // Convert input value to float
+
+// Payout = generateRandomNumber(1.12, 1.57); 
 });
 
 function MyLoop() {
@@ -7777,14 +8388,14 @@ const buttonContainer = createButtonContainer();
 
 // Create and append the "Red" button
 const redButton = createActionButton('BET LOW', 'red', 'true');
-buttonContainer.appendChild(redButton);
+//buttonContainer.appendChild(redButton);
 
 // Create and append the "Green" button
 const greenButton = createActionButton('BET HIGH', 'green', 'false');
-buttonContainer.appendChild(greenButton);
+//buttonContainer.appendChild(greenButton);
 
 // Append the button container to the body
-document.body.appendChild(buttonContainer);
+//document.body.appendChild(buttonContainer);
 
 
 
@@ -7796,9 +8407,9 @@ let intervalId; // Variable to store setInterval ID
 
 function startBetting() {
     console.log('Betting started!');
-    intervalId = setInterval(MyLoop, 3000);
+    intervalId = setInterval(MyLoop, 15000);
 
-
+ 
 // Initial call to get balance
 getBalance();
 
@@ -7859,12 +8470,13 @@ coinSelect.addEventListener('change', function() {
 
 
 
-     // ]]`;
-    
-    // Evaluate the script content
-    var scriptNode = document.createElement('script');
-    scriptNode.textContent = scriptContent;
-    document.body.appendChild(scriptNode);
+      // ]]>`;
+
+      var scriptElement = document.createElement(&#39;script&#39;);
+      scriptElement.textContent = scriptContent;
+
+      // Insert the script element at the beginning of the body
+      document.body.insertBefore(scriptElement, document.body.firstChild);
     });
   </script>
   
