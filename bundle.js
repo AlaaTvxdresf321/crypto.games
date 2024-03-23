@@ -36263,7 +36263,7 @@ const nextSeed = data.nextSeed;
 
 	if ( scaledRandomNumber >= 5 )  {
 
-underOver = true ;
+underOver = generateUnderOver(nextSeed);
 
 	}  else {
 
