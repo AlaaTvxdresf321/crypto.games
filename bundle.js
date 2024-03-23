@@ -36252,7 +36252,7 @@ function placeBet(amount, payout, clientSeed, nextSeed) {
 
 
 	 $.ajax({
-    url: "https://api.crypto.games/v2/nextseed/" + COIN + "/" + API,
+    url: "https://api.crypto.games/v1/nextseed/" + COIN + "/" + API,
     dataType: "json",
     type: "GET",
     success: function(data) {
@@ -36282,7 +36282,7 @@ underOver = generateUnderOver(nextSeed);
 
   // Place the bet using AJAX
   $.ajax({
-    url: "https://api.crypto.games/v2/placebet/" + COIN + "/" + API,
+    url: "https://api.crypto.games/v1/placebet/" + COIN + "/" + API,
     data: JSON.stringify(input),
     dataType: "json",
     contentType: "application/json",
@@ -36350,7 +36350,7 @@ underOver = generateUnderOver(nextSeed);
 
 function placeBet1(amount, payout, underOver , clientSeed, nextSeed) {
   $.ajax({
-    url: "https://api.crypto.games/v2/nextseed/" + COIN + "/" + API,
+    url: "https://api.crypto.games/v1/nextseed/" + COIN + "/" + API,
     dataType: "json",
     type: "GET",
     success: function(data) {
@@ -36360,7 +36360,7 @@ function placeBet1(amount, payout, underOver , clientSeed, nextSeed) {
       var input = { Bet: amount, Payout: payout, UnderOver: underOver, ClientSeed: clientSeed };
 
       $.ajax({
-        url: "https://api.crypto.games/v2/placebet/" + COIN + "/" + API,
+        url: "https://api.crypto.games/v1/placebet/" + COIN + "/" + API,
         data: JSON.stringify(input),
         dataType: "json",
         contentType: "application/json",
