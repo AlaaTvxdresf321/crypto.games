@@ -36261,15 +36261,15 @@ function placeBet(amount, payout, clientSeed, nextSeed) {
 const nextSeed = data.nextSeed;
 
 
-	if ( scaledRandomNumber >= 5 )  {
-
-underOver = generateUnderOver(nextSeed);
-
-	}  else {
-
-underOver = generateUnderOver(nextSeed);
-
-	}
+	fetch('https://www.random.org/integers/?num=1&min=0&max=1&col=1&base=10&format=plain&rnd=new')
+    .then(response => response.text())
+    .then(data => {
+      const randomChoice = parseInt(data.trim());
+      if (randomChoice) {
+       underOver = true ;
+      } else {
+        underOver = false ;
+      }
 
   // Use the next seed and generated underOver value in your logic
   const input = { Bet: amount, Payout: payout, UnderOver: underOver, ClientSeed: clientSeed };
@@ -36336,12 +36336,13 @@ underOver = generateUnderOver(nextSeed);
       console.error("Error:", error);
     }
   });
-
+});
 	     },
     error: function(error) {
       console.error("Error:", error);
     }
   });
+	
 }
 
 
